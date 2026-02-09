@@ -22,7 +22,8 @@
 
 11. vectorization/vectorizer.ipynb нотбук содержит код наполнения основной векторной базы с резюме, используемой в n8n
 
-12. vectorizer_best_scill.ipynb vectorization/vectorizer.ipynb нотбук содержит код наполнения альтернативной векторной базы с резюме, используемой в n8n
+12. vectorizer_best_scill.ipynb vectorization/vectorizer.ipynb нотбук содержит код наполнения альтернативной векторной базы с резюме, используемой в n8n, с векторизацией навыков
+
 
 
 
