@@ -4,7 +4,7 @@
 
 **Что это:** прототип системы, которая принимает **вакансию файлом** в Telegram, извлекает из неё **структуру требований**, находит наиболее релевантные резюме в **векторной базе Pinecone** и отправляет пользователю **топ кандидатов + объяснение**.
 
-* **n8n workflow:** [https://darshaka17.app.n8n.cloud/workflow/qeFh71jAE1imXhgn6nPNz](https://darshaka17.app.n8n.cloud/workflow/qeFh71jAE1imXhgn6nPNz) ([darshaka17.app.n8n.cloud][1])
+* **n8n workflow:** [https://darshaka17.app.n8n.cloud/workflow/qeFh71jAE1imXhgn6nPNz](https://darshaka17.app.n8n.cloud/workflow/10wTUNEEMTKkbvnC)
 * **Telegram-бот:** `@rvm_2_bot`
 
 ---
