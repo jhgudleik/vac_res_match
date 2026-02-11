@@ -1,0 +1,9 @@
+Метрика,Значение,Baseline (случайный)
+Top-1 Accuracy,16.7%,20.0%
+Top-2 Accuracy,43.3%,40.0%
+Top-3 Accuracy,66.7%,60.0%
+Kendall tau (mean),+0.129,0.000
+Spearman rho (mean),+0.185,0.000
+Krippendorff alpha (ordinal),0.1884,0.000
+Krippendorff alpha (nominal),0.1362,0.000
+Cohen kappa (Top-1),-0.0593,0.000
