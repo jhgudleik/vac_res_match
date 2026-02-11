@@ -31,8 +31,8 @@
 4. [Эксперименты и гипотезы](#4--эксперименты-и-гипотезы)
 5. [Метрики и результаты](#5--метрики-и-результаты)
 6. [Почему выбрали “структуру по паттернам”](#6--почему-выбрали-структуру-по-паттернам)
-7. [Режимы: эксперименты vs демо](#7--режимы-эксперименты-vs-демо)
-8. [Альтернативная ветка: Structured Retrieval + LLM Reranker](#8--альтернативная-ветка-structured-retrieval-llm-reranker)
+7. [Режимы: эксперименты vs демо](#7-режимы-эксперименты-vs-демо)
+8. [Альтернативная ветка: Structured Retrieval + LLM Reranker](#8-альтернативная-ветка-structured-retrieval-llm-reranker)
 ---
 
 ## 1. 🎯 Цель, зоны ответственности и результат
@@ -398,3 +398,18 @@ ar_miniLM_patterns = [
 * структурированное извлечение,
 * векторный поиск,
 * и LLM-реранжирование для повышения качества подбора.
+
+### Новые файлы по параллельной ветке
+
+- 📝 Документ — описание новой ветки  
+  [new_workflow.docx](https://github.com/jhgudleik/vac_res_match/tree/main/n8n/new_workflow.docx)
+
+- 🧩 Схема воркфлоу (JSON) — новая схема с двумя ветками  
+  [2_Hackathon v2.json](https://github.com/jhgudleik/vac_res_match/tree/main/n8n/2_Hackathon%20v2.json)
+
+- 📊 Статистика по параллельной ветке  
+  [evaluation](https://github.com/jhgudleik/vac_res_match/tree/main/evaluation)
+
+- 🧪 Пайплайн подготовки параллельной ветки (Jupyter Notebook)  
+  [vacancy_resume_pipeline_(1).ipynb](https://github.com/jhgudleik/vac_res_match/blob/main/extraction/vacancy_resume_pipeline_%281%29.ipynb)
+
