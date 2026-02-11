@@ -1,0 +1,635 @@
+{
+  "name": "Hackathon v2",
+  "nodes": [
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "contextWindowLength": "={{ 5 }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1664,
+        128
+      ],
+      "id": "72c01195-c8a3-4c1f-bcd8-4204b108ce85",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Search resume database by skills and requirements",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "best-scills-768",
+          "mode": "list",
+          "cachedResultName": "best-scills-768"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        2016,
+        128
+      ],
+      "id": "d5ede289-82aa-477f-8af8-5bb52a3e13fd",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "EFsqgpMSVqkqnJRL",
+          "name": "PineconeApi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        176
+      ],
+      "id": "d85fca29-e162-4873-bcde-317d17e28bc1",
+      "name": "Embeddings HuggingFace Inference",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "2QUWawcup4zvKKxD",
+          "name": "HuggingFaceApi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 24810
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        128
+      ],
+      "id": "120f864e-1550-4d17-a0f4-39fa2b8cdf4d",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "gh6MHd2yC90R0s9X",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        -80
+      ],
+      "id": "7c47fe6f-c6db-4429-8a1b-9fb8804dd1d9",
+      "name": "Telegram Trigger",
+      "webhookId": "48a09a4d-dd02-45fb-b0af-fdfc1fd6b22f",
+      "credentials": {
+        "telegramApi": {
+          "id": "Kpq2ksMEcpEbRfAS",
+          "name": "rvm_2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=={{ \n`Ты технический рекрутер. У тебя уже есть извлечённые требования из вакансии — НЕ проси их у пользователя.\n\nИзвлечённые требования (targets):\n${JSON.stringify($json.targets, null, 2)}\n\nСводка:\n${JSON.stringify($json.summary, null, 2)}\n\nЗадача:\n1) Сначала используй инструмент Pinecone Vector Store для поиска по базе резюме.\n2) Верни ТОП-3 наиболее подходящих резюме.\n3) Для каждого: совпавшие навыки + краткое обоснование.\nОтвет на русском.` \n}}\n",
+        "options": {
+          "systemMessage": "=Используй Pinecone Vector Store как основной источник резюме. Не проси у пользователя skills, если targets уже переданы в prompt."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1616,
+        -80
+      ],
+      "id": "3f37bd07-74e2-4d7d-bcf4-4c364ce7cd87",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2208,
+        -80
+      ],
+      "id": "b5900922-ae0e-4e6f-929f-0174eed10e5a",
+      "name": "Send a text message",
+      "webhookId": "9dd15ba7-0d52-4094-9364-c225fccfc431",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Kpq2ksMEcpEbRfAS",
+          "name": "rvm_2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.document.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        944,
+        -80
+      ],
+      "id": "e84b97de-c791-45da-8a33-5733986e63fc",
+      "name": "Get a file",
+      "webhookId": "9b1fe016-786a-4be1-99c0-30e8fafb5330",
+      "credentials": {
+        "telegramApi": {
+          "id": "Kpq2ksMEcpEbRfAS",
+          "name": "rvm_2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        -80
+      ],
+      "id": "8ffa2ab5-f617-45fc-b2c6-450f16ec602e",
+      "name": "Extract from File",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// ПАТТЕРНЫ ДЛЯ ИЗВЛЕЧЕНИЯ\nconst PROGRAMMING_LANGUAGES = {\n  'python': /\\bpython\\b/i,\n  'java': /\\bjava(?!script)\\b/i,\n  'javascript': /\\b(?:javascript|js)\\b/i,\n  'typescript': /\\btypescript\\b/i,\n  'csharp': /\\b(?:c#|csharp|c\\s*sharp)\\b/i,\n  'cpp': /\\b(?:c\\+\\+|cpp)\\b/i,\n  'go': /\\b(?:golang|go\\s+lang)\\b/i,\n  'rust': /\\brust\\b/i,\n  'ruby': /\\bruby\\b/i,\n  'php': /\\bphp\\b/i,\n  'swift': /\\bswift\\b/i,\n  'kotlin': /\\bkotlin\\b/i,\n  'scala': /\\bscala\\b/i,\n  'perl': /\\bperl\\b/i,\n  'sql': /\\bsql\\b/i,\n  'bash': /\\bbash\\b/i,\n  'powershell': /\\bpowershell\\b/i,\n};\n\nconst FRAMEWORKS = {\n  'react': /\\breact(?:\\.?js)?\\b/i,\n  'angular': /\\bangular(?:\\.?js)?\\b/i,\n  'vue': /\\bvue(?:\\.?js)?\\b/i,\n  'jquery': /\\bjquery\\b/i,\n  'bootstrap': /\\bbootstrap\\b/i,\n  'nextjs': /\\bnext\\.?js\\b/i,\n  'nodejs': /\\bnode\\.?js\\b/i,\n  'express': /\\bexpress(?:\\.?js)?\\b/i,\n  'django': /\\bdjango\\b/i,\n  'flask': /\\bflask\\b/i,\n  'fastapi': /\\bfastapi\\b/i,\n  'spring': /\\bspring(?:\\s*boot)?\\b/i,\n  'hibernate': /\\bhibernate\\b/i,\n  'dotnet': /\\b(?:\\.net|dotnet|asp\\.?net)\\b/i,\n  'rails': /\\b(?:ruby\\s+on\\s+)?rails\\b/i,\n  'laravel': /\\blaravel\\b/i,\n  'mvc': /\\b(?:asp\\.?net\\s+)?mvc\\b/i,\n  'wcf': /\\bwcf\\b/i,\n  'entity_framework': /\\bentity\\s*framework\\b/i,\n  'webapi': /\\bweb\\s*api\\b/i,\n  'drupal': /\\bdrupal\\b/i,\n};\n\nconst DATABASES = {\n  'mysql': /\\bmysql\\b/i,\n  'postgresql': /\\b(?:postgresql|postgres)\\b/i,\n  'sqlite': /\\bsqlite\\b/i,\n  'oracle': /\\boracle(?:\\s+db)?\\b/i,\n  'mssql': /\\b(?:ms\\s*sql|sql\\s*server|mssql)\\b/i,\n  'mongodb': /\\bmongodb?\\b/i,\n  'redis': /\\bredis\\b/i,\n  'elasticsearch': /\\belastic\\s*search\\b/i,\n  'cassandra': /\\bcassandra\\b/i,\n  'dynamodb': /\\bdynamodb\\b/i,\n  'mariadb': /\\bmariadb\\b/i,\n};\n\nconst DEVOPS_TOOLS = {\n  'docker': /\\bdocker\\b/i,\n  'kubernetes': /\\b(?:kubernetes|k8s)\\b/i,\n  'aws': /\\b(?:aws|amazon\\s+web\\s+services)\\b/i,\n  'azure': /\\b(?:azure|microsoft\\s+azure)\\b/i,\n  'gcp': /\\b(?:gcp|google\\s+cloud)\\b/i,\n  'terraform': /\\bterraform\\b/i,\n  'ansible': /\\bansible\\b/i,\n  'jenkins': /\\bjenkins\\b/i,\n  'git': /\\bgit(?!hub|lab)\\b/i,\n  'gitlab': /\\bgitlab\\b/i,\n  'github': /\\bgithub\\b/i,\n  'tfs': /\\btfs\\b/i,\n  'cicd': /\\b(?:ci\\/?cd|continuous\\s+integration)\\b/i,\n};\n\nconst OPERATING_SYSTEMS = {\n  'linux': /\\blinux\\b/i,\n  'unix': /\\bunix\\b/i,\n  'windows': /\\bwindows(?:\\s+server)?\\b/i,\n  'macos': /\\b(?:macos|mac\\s+os|osx)\\b/i,\n};\n\nconst METHODOLOGIES = {\n  'agile': /\\bagile\\b/i,\n  'scrum': /\\bscrum\\b/i,\n  'kanban': /\\bkanban\\b/i,\n  'waterfall': /\\bwaterfall\\b/i,\n  'devops': /\\bdevops\\b/i,\n  'tdd': /\\btdd\\b/i,\n  'sdlc': /\\bsdlc\\b/i,\n  'oop': /\\b(?:oop|object[\\-\\s]?oriented)\\b/i,\n  'solid': /\\bsolid\\b/i,\n};\n\nconst EXPERIENCE_PATTERNS = [\n  /(\\d+)\\+?\\s*(?:years?|yrs?|года|лет)\\s*(?:of)?\\s*(?:experience|exp|опыта)?/gi,\n  /(?:experience|exp|опыт)\\s*(?:of|от)?\\s*(\\d+)\\+?\\s*(?:years?|yrs?|года|лет)/gi,\n  /(?:minimum|min|at\\s+least|минимум)\\s*(\\d+)\\s*(?:years?|yrs?|года|лет)/gi,\n];\n\nconst EDUCATION_LEVELS = {\n  'phd': /\\b(?:ph\\.?d|doctorate|doctoral|аспирантура|кандидат\\s+наук)\\b/i,\n  'master': /\\b(?:master|m\\.?s\\.?|m\\.?sc|магистр)\\b/i,\n  'bachelor': /\\b(?:bachelor|b\\.?s\\.?|b\\.?sc|b\\.?a\\.?|бакалавр)\\b/i,\n};\n\nconst SKILL_CATEGORIES = {\n  'programming_languages': PROGRAMMING_LANGUAGES,\n  'frameworks': FRAMEWORKS,\n  'databases': DATABASES,\n  'devops_tools': DEVOPS_TOOLS,\n  'operating_systems': OPERATING_SYSTEMS,\n  'methodologies': METHODOLOGIES,\n};\n\n// Иерархия навыков\nconst SKILL_HIERARCHY = {\n  'postgresql': ['sql'],\n  'mysql': ['sql'],\n  'mssql': ['sql'],\n  'oracle': ['sql'],\n  'mariadb': ['sql'],\n  'react': ['javascript'],\n  'angular': ['javascript'],\n  'vue': ['javascript'],\n  'nodejs': ['javascript'],\n  'jquery': ['javascript'],\n  'typescript': ['javascript'],\n  'nextjs': ['javascript'],\n  'django': ['python'],\n  'flask': ['python'],\n  'fastapi': ['python'],\n  'spring': ['java'],\n  'hibernate': ['java'],\n  'dotnet': ['csharp'],\n  'mvc': ['csharp', 'dotnet'],\n  'wcf': ['csharp', 'dotnet'],\n  'entity_framework': ['csharp', 'dotnet'],\n  'webapi': ['csharp', 'dotnet'],\n  'kubernetes': ['docker'],\n  'gitlab': ['git'],\n  'github': ['git'],\n  'tfs': ['git'],\n};\n\n// ============================================================================\n// ФУНКЦИИ\n// ============================================================================\n\nfunction cleanRtfText(rtfText) {\n  if (!rtfText) return '';\n\n  let text = rtfText;\n\n  // Удаляем RTF control words\n  text = text.replace(/\\\\[a-z]+\\d*\\s?/g, '');\n\n  // Удаляем фигурные скобки\n  text = text.replace(/[{}]/g, '');\n\n  // Удаляем escape-последовательности\n  text = text.replace(/\\\\'[0-9a-fA-F]{2}/g, '');\n\n  // Удаляем обратные слеши\n  text = text.replace(/\\\\/g, '');\n\n  // Заменяем множественные пробелы на одиночные\n  text = text.replace(/\\s+/g, ' ');\n\n  // Trim\n  text = text.trim();\n\n  return text;\n}\n\nfunction extractSkills(text, patterns) {\n  const found = new Set();\n\n  for (const [skillName, pattern] of Object.entries(patterns)) {\n    if (pattern.test(text)) {\n      found.add(skillName);\n    }\n  }\n\n  return found;\n}\n\nfunction extractExperienceYears(text) {\n  const years = [];\n\n  for (const pattern of EXPERIENCE_PATTERNS) {\n    const matches = [...text.matchAll(pattern)];\n    for (const match of matches) {\n      const year = parseInt(match[1]);\n      if (!isNaN(year)) {\n        years.push(year);\n      }\n    }\n  }\n\n  return years.length > 0 ? Math.max(...years) : 0;\n}\n\nfunction extractEducationLevel(text) {\n  const levelScores = {\n    'phd': 3,\n    'master': 2,\n    'bachelor': 1\n  };\n\n  for (const [level, pattern] of Object.entries(EDUCATION_LEVELS)) {\n    if (pattern.test(text)) {\n      return levelScores[level];\n    }\n  }\n\n  return 0;\n}\n\nfunction extractAllTargets(text) {\n  const result = {};\n\n  // Извлекаем навыки по категориям\n  for (const [categoryName, patterns] of Object.entries(SKILL_CATEGORIES)) {\n    result[categoryName] = extractSkills(text, patterns);\n  }\n\n  // Извлекаем опыт и образование\n  result.experience_years = extractExperienceYears(text);\n  result.education_level = extractEducationLevel(text);\n\n  // === ИЗМЕНЕНИЕ: primary_language ===\n  result.primary_language = result.programming_languages.size > 0\n    ? Array.from(result.programming_languages)[0]\n    : null;\n\n  return result;\n}\n\nfunction expandSkills(targets) {\n  const expanded = {};\n\n  for (const [category, skills] of Object.entries(targets)) {\n    if (skills instanceof Set) {\n      const expandedSet = new Set(skills);\n\n      // Добавляем родительские навыки из иерархии\n      for (const skill of skills) {\n        if (SKILL_HIERARCHY[skill]) {\n          for (const parentSkill of SKILL_HIERARCHY[skill]) {\n            expandedSet.add(parentSkill);\n          }\n        }\n      }\n\n      expanded[category] = expandedSet;\n    } else {\n      expanded[category] = skills;\n    }\n  }\n\n  return expanded;\n}\n\nfunction formatTargets(targets) {\n  const formatted = {};\n\n  for (const [key, value] of Object.entries(targets)) {\n    if (value instanceof Set) {\n      formatted[key] = Array.from(value).sort();\n    } else {\n      formatted[key] = value;\n    }\n  }\n\n  return formatted;\n}\n\n// ============================================================================\n// ОСНОВНАЯ ЛОГИКА\n// ============================================================================\n\n// NEW: универсально извлекаем chatId из Telegram Trigger (не только message)\nconst tg = $node[\"Telegram Trigger\"]?.json ?? {};\nconst chatId =\n  tg.message?.chat?.id ??\n  tg.edited_message?.chat?.id ??\n  tg.callback_query?.message?.chat?.id ??\n  tg.channel_post?.chat?.id ??\n  tg.edited_channel_post?.chat?.id ??\n  tg.my_chat_member?.chat?.id ??\n  tg.chat_member?.chat?.id ??\n  tg.chat_join_request?.chat?.id ??\n  // fallback: иногда можно взять хотя бы from.id (для лички часто совпадает, но лучше иметь chat.id)\n  tg.message?.from?.id ??\n  tg.callback_query?.from?.id ??\n  null;\n\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  // Получаем текст вакансии из поля 'data'\n  const vacancyText = item.json.data || '';\n\n  if (!vacancyText) {\n    results.push({\n      json: {\n        chatId, // NEW\n        success: false,\n        error: 'No data field found',\n        targets: null\n      }\n    });\n    continue;\n  }\n\n  try {\n    // Шаг 1: Очищаем RTF\n    const cleanText = cleanRtfText(vacancyText);\n\n    // Шаг 2: Извлекаем таргеты\n    let targets = extractAllTargets(cleanText);\n\n    // Шаг 3: Расширяем навыки по иерархии\n    targets = expandSkills(targets);\n\n    // Шаг 4: Форматируем для JSON (Set -> Array)\n    const formattedTargets = formatTargets(targets);\n\n    // Шаг 5: Создаем сводку\n    const totalSkills = Object.entries(formattedTargets)\n      .filter(([key]) => !['experience_years', 'education_level', 'primary_language'].includes(key))\n      .reduce((sum, [, skills]) => sum + skills.length, 0);\n\n    const summary = {\n      total_skills_found: totalSkills,\n      programming_languages_count: formattedTargets.programming_languages?.length || 0,\n      frameworks_count: formattedTargets.frameworks?.length || 0,\n      databases_count: formattedTargets.databases?.length || 0,\n      devops_tools_count: formattedTargets.devops_tools?.length || 0,\n      operating_systems_count: formattedTargets.operating_systems?.length || 0,\n      methodologies_count: formattedTargets.methodologies?.length || 0,\n      experience_required_years: formattedTargets.experience_years || 0,\n      education_level: formattedTargets.education_level || 0,\n      primary_language: formattedTargets.primary_language || null\n    };\n\n    // Формируем результат\n    results.push({\n      json: {\n        chatId, // NEW\n        success: true,\n        targets: formattedTargets,\n        summary: summary,\n        debug_info: {\n          original_length: vacancyText.length,\n          cleaned_length: cleanText.length,\n          clean_preview: cleanText.substring(0, 200) + (cleanText.length > 200 ? '...' : '')\n        }\n      }\n    });\n\n  } catch (error) {\n    results.push({\n      json: {\n        chatId, // NEW\n        success: false,\n        error: error.message,\n        error_type: error.name,\n        targets: null\n      }\n    });\n  }\n}\n\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        -80
+      ],
+      "id": "b81d1e89-00dc-470b-849d-5bb966f3a4d9",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the output from AI Agent\nconst ai = $input.first().json ?? {};\n\n// Extract chatId from Telegram Trigger using proper n8n expression syntax\nconst chatId = $('Telegram Trigger').item.json.message?.chat?.id ?? null;\n\n// Return one item: output + chatId\nreturn [{ json: { ...ai, chatId } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1984,
+        -80
+      ],
+      "id": "76290363-b75f-49ce-8ae6-86f8a25f9aac",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================================\n// Извлечение навыков из вакансии + подготовка query для эмбеддинга\n// ============================================================================\n\nconst DATABASES = {\n  'mysql': /\\bmysql\\b/i,\n  'postgresql': /\\b(?:postgresql|postgres)\\b/i,\n  'sqlite': /\\bsqlite\\b/i,\n  'oracle': /\\boracle(?:\\s+db)?\\b/i,\n  'mssql': /\\b(?:ms\\s*sql|sql\\s*server|mssql)\\b/i,\n  'mongodb': /\\bmongodb?\\b/i,\n  'redis': /\\bredis\\b/i,\n  'elasticsearch': /\\belastic\\s*search\\b/i,\n  'cassandra': /\\bcassandra\\b/i,\n  'dynamodb': /\\bdynamodb\\b/i,\n  'mariadb': /\\bmariadb\\b/i\n};\n\nconst PROGRAMMING_LANGUAGES = {\n  'python': /\\bpython\\b/i,\n  'java': /\\bjava(?!script)\\b/i,\n  'javascript': /\\b(?:javascript|js)\\b/i,\n  'typescript': /\\btypescript\\b/i,\n  'csharp': /\\b(?:c#|csharp|c\\s*sharp)\\b/i,\n  'cpp': /\\b(?:c\\+\\+|cpp)\\b/i,\n  'go': /\\b(?:golang|go\\s+lang)\\b/i,\n  'ruby': /\\bruby\\b/i,\n  'php': /\\bphp\\b/i,\n  'sql': /\\bsql\\b/i\n};\n\nconst FRAMEWORKS = {\n  'react': /\\breact(?:\\.?js)?\\b/i,\n  'angular': /\\bangular(?:\\.?js)?\\b/i,\n  'vue': /\\bvue(?:\\.?js)?\\b/i,\n  'nodejs': /\\bnode\\.?js\\b/i,\n  'express': /\\bexpress(?:\\.?js)?\\b/i,\n  'django': /\\bdjango\\b/i,\n  'flask': /\\bflask\\b/i,\n  'spring': /\\bspring(?:\\s*boot)?\\b/i,\n  'dotnet': /\\b(?:\\.net|dotnet|asp\\.?net)\\b/i,\n  'docker': /\\bdocker\\b/i,\n  'kubernetes': /\\b(?:kubernetes|k8s)\\b/i,\n  'aws': /\\b(?:aws|amazon\\s+web\\s+services)\\b/i\n};\n\nfunction cleanText(text) {\n  if (!text) return '';\n  let t = text;\n  t = t.replace(/\\\\[a-z]+\\d*\\s?/g, '');\n  t = t.replace(/[{}]/g, '');\n  t = t.replace(/\\\\'[0-9a-fA-F]{2}/g, '');\n  t = t.replace(/\\\\\\\\/g, '');\n  t = t.replace(/\\s+/g, ' ');\n  return t.trim();\n}\n\nfunction extract(text, patterns) {\n  const found = [];\n  for (const [name, pat] of Object.entries(patterns)) {\n    if (pat.test(text)) found.push(name);\n  }\n  return found;\n}\n\nconst tg = $('Telegram Trigger').item.json;\nconst chatId = tg.message?.chat?.id ?? null;\n\nconst rawText = $input.first().json.data || '';\nconst vacancyText = cleanText(rawText);\n\nconst databases = extract(vacancyText, DATABASES);\nconst languages = extract(vacancyText, PROGRAMMING_LANGUAGES);\nconst frameworks = extract(vacancyText, FRAMEWORKS);\n\nconst skillsSummary = [\n  languages.length > 0 ? `Languages: ${languages.join(', ')}` : '',\n  frameworks.length > 0 ? `Frameworks: ${frameworks.join(', ')}` : '',\n  databases.length > 0 ? `Databases: ${databases.join(', ')}` : ''\n].filter(Boolean).join('; ');\n\nreturn [{\n  json: {\n    chatId,\n    vacancy_text: vacancyText.substring(0, 4000),\n    vacancy_databases: databases,\n    vacancy_languages: languages,\n    vacancy_frameworks: frameworks,\n    skills_summary: skillsSummary\n  }\n}];"
+      },
+      "id": "207c6738-8877-48a5-b81a-485f13ae07cd",
+      "name": "Parse Vacancy",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.jina.ai/v1/embeddings",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"jina-embeddings-v2-base-en\",\n  \"input\": [{{ JSON.stringify($json.vacancy_text.substring(0, 512)) }}]\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "04430bb8-ccd4-4f8a-abbf-66cc0456664d",
+      "name": "HuggingFace Embedding",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        -304
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Yp6Zs9Ud7Dx2ISwN",
+          "name": "Jina Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const vacancy = $('Parse Vacancy').item.json;\nconst response = $input.first().json;\n\nconst vector = response.data[0].embedding;\n\nreturn [{\n  json: {\n    chatId: vacancy.chatId,\n    vacancy_text: vacancy.vacancy_text,\n    skills_summary: vacancy.skills_summary,\n    vacancy_databases: vacancy.vacancy_databases,\n    vector\n  }\n}];"
+      },
+      "id": "d65c29ea-4a18-461f-82dd-a82566b9529f",
+      "name": "Prepare Vector",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================================\n// Stage 1: Обработка результатов Pinecone → top-5 для реранкера\n// ============================================================================\n\nconst vacancy = $('Prepare Vector').item.json;\nconst pineconeRaw = $input.first().json;\n\nconst matches = pineconeRaw.matches || [];\n\nif (matches.length === 0) {\n  return [{\n    json: {\n      chatId: vacancy.chatId,\n      error: true,\n      output: '\\u274C В базе Pinecone не найдено подходящих резюме.'\n    }\n  }];\n}\n\nconst candidates = matches.map((m, idx) => {\n  const meta = m.metadata || {};\n  return {\n    rank: idx + 1,\n    id: m.id,\n    score: (m.score || 0).toFixed(3),\n    cv_text: meta.text || meta.content || meta.pageContent || meta.doc || JSON.stringify(meta),\n    cv_name: meta.name || meta.filename || meta.title || meta.source || m.id\n  };\n});\n\nconst topN = candidates.slice(0, 5);\n\nconst stage1List = topN.map(c =>\n  `${c.rank}. ${c.cv_name} (score: ${c.score})`\n);\n\nreturn [{\n  json: {\n    chatId: vacancy.chatId,\n    error: false,\n    vacancy_text: vacancy.vacancy_text,\n    skills_summary: vacancy.skills_summary,\n    vacancy_databases: vacancy.vacancy_databases,\n    topN,\n    remaining: candidates.slice(5),\n    stage1_list: stage1List,\n    total_found: candidates.length\n  }\n}];"
+      },
+      "id": "dc6de35e-cb52-4ef4-85d6-ff07b0587c74",
+      "name": "Stage 1 Filter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst data = $input.first().json;\n\nif (data.error) {\n  return [{ json: data }];\n}\n\nconst candidateDescriptions = data.topN.map((c, i) =>\n  `### Кандидат ${i + 1} (ID: ${c.id})\\nИмя: ${c.cv_name}\\nPinecone score: ${c.score}\\n\\nРезюме (фрагмент):\\n${(c.cv_text || '').substring(0, 800)}`\n).join('\\n\\n---\\n\\n');\n\nconst prompt = `Ты опытный технический рекрутер. Тебе дана вакансия и ${data.topN.length} кандидатов-финалистов, найденных в базе резюме.\n\nЗадача: расставь кандидатов от наиболее подходящего к наименее подходящему для данной вакансии.\n\nУчитывай:\n- Совпадение технического стека (языки, фреймворки, БД, DevOps)\n- Уровень и релевантность опыта\n- Специализацию кандидата vs требования вакансии\n- Базы данных особенно важны для оценки\n\n## Вакансия:\n${data.vacancy_text.substring(0, 2000)}\n\nИзвлечённые навыки вакансии: ${data.skills_summary}\n\n## Кандидаты-финалисты:\n${candidateDescriptions}\n\nОтветь СТРОГО в формате JSON без markdown-обёрток:\n{\n  \"ranking\": [\"ID_лучшего\", \"ID_второго\", \"ID_третьего\", ...],\n  \"reasoning\": \"краткое обоснование на русском, 2-3 предложения\",\n  \"top1_details\": \"почему первый кандидат лучше всего подходит, 1-2 предложения\"\n}`;\n\nreturn [{\n  json: {\n    chatId: data.chatId,\n    error: false,\n    prompt,\n    topN: data.topN,\n    remaining: data.remaining,\n    stage1_list: data.stage1_list,\n    total_found: data.total_found,\n    skills_summary: data.skills_summary\n  }\n}];"
+      },
+      "id": "913de09b-3a76-4953-b38d-7389080765ec",
+      "name": "Build Reranker Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2496,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"anthropic/claude-sonnet-4\",\n  \"max_tokens\": 600,\n  \"temperature\": 0.1,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($json.prompt) }}\n    }\n  ]\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "50729d3a-6686-476e-8a2a-4cfe3465d100",
+      "name": "LLM Reranker",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2720,
+        -304
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "sD1B59PJev1X5kwH",
+          "name": "LLM Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://best-scills-768-q9h8kqx.svc.aped-4627-b74a.pinecone.io/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { vector: $json.vector, topK: 10, includeMetadata: true } }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "aa36bc24-a010-44fc-979f-4f4174d49b03",
+      "name": "Pinecone Query",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2032,
+        -304
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "gjbUTeNJlWa3UqB3",
+          "name": "Pinecone Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the output from AI Agent\nconst ai = $input.first().json ?? {};\n\n// Extract chatId from Telegram Trigger using proper n8n expression syntax\nconst chatId = $('Telegram Trigger').item.json.message?.chat?.id ?? null;\n\n// Return one item: output + chatId\nreturn [{ json: { ...ai, chatId } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2960,
+        -304
+      ],
+      "id": "9e0a89f5-72ac-4c77-9fe1-bc26d97c77d2",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.choices[0].message.content }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3152,
+        -304
+      ],
+      "id": "33948c2b-70c2-4871-ac0d-eb868af58b07",
+      "name": "Send a text message1",
+      "webhookId": "9dd15ba7-0d52-4094-9364-c225fccfc431",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Kpq2ksMEcpEbRfAS",
+          "name": "rvm_2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2784,
+        208
+      ],
+      "id": "2ccde2f1-0927-4ee4-a8ab-5d612b392179",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Parse Vacancy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Vacancy": {
+      "main": [
+        [
+          {
+            "node": "HuggingFace Embedding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HuggingFace Embedding": {
+      "main": [
+        [
+          {
+            "node": "Prepare Vector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Vector": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stage 1 Filter": {
+      "main": [
+        [
+          {
+            "node": "Build Reranker Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Reranker Prompt": {
+      "main": [
+        [
+          {
+            "node": "LLM Reranker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Reranker": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Query": {
+      "main": [
+        [
+          {
+            "node": "Stage 1 Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "30e78c07-d45e-4dee-98c6-95c800930ce6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d9787621237d45d02d8aef8a4368bae7475d3353c95f82386a237584f46a08cb"
+  },
+  "id": "10wTUNEEMTKkbvnC",
+  "tags": []
+}
