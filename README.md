@@ -248,7 +248,8 @@ Workflow состоит из **10 последовательных узлов**,
 
 * **Krippendorff’s alpha (ordinal)** — измеряет согласованность оценок как порядковых (чем выше, тем лучше; 0 — примерно “слабое согласие”, отрицательные — хуже случайного/противоречиво).
 * **Cohen’s kappa (linear weights)** — согласованность двух “оценщиков” с учётом порядковости.
-  Расхождения в оценках с аннотаторами может объясняться тем, что аннотаторы тоже сильно расходятся во мнениях [между собой](https://github.com/jhgudleik/vac_res_match/tree/main/evaluation/annotators/IAA_отчет.docx)
+ 
+  Расхождения в оценках с аннотаторами может объясняться тем, что аннотаторы тоже сильно расходятся во мнениях [между собой](https://github.com/jhgudleik/vac_res_match/tree/main/evaluation/annotators/IAA_отчет.docx).docx)
 ### 🥇 Итоговая таблица (из файла [metrics_calculation_final](https://github.com/jhgudleik/vac_res_match/blob/main/evaluation/metrics_calculation_final.ipynb).ipynb)
 
 > Ниже — ключевой вывод: лучшая и наиболее стабильная согласованность получилась у варианта **MiniLM + patterns (skills)**, альфа около **0.30** (для аннотатора 1).
