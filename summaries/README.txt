@@ -1,3 +1,6 @@
+#ЗОНА ОТВЕТСТВЕННОСТИ ПЕРОВА БОРИСА
+#Была задача сделать функцию, которая принимает на вход текст (вакансии), инициализирует внутри модель и возвращает саммари
+#Была создана функция, далее функция была разбита на модули для удобного добавления в общий проект
 Использование из модулей
 from vacancy_summarizer import VacancySummarizer
 
@@ -14,4 +17,5 @@ results = generator.create_dataset_summaries(vacancies)
 from vacancy_summarizer.utils import save_summaries_to_csv, print_summary_results
 
 save_summaries_to_csv(df, "results.csv")
+
 print_summary_results(df)
